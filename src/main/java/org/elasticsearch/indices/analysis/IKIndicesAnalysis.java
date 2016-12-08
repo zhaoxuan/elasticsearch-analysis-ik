@@ -3,15 +3,14 @@ package org.elasticsearch.indices.analysis;
 import org.apache.lucene.analysis.Tokenizer;
 import org.elasticsearch.common.component.AbstractComponent;
 import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.inject.assistedinject.Assisted;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.analysis.AnalyzerScope;
 import org.elasticsearch.index.analysis.PreBuiltAnalyzerProviderFactory;
 import org.elasticsearch.index.analysis.PreBuiltTokenizerFactoryFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
+
 import org.wltea.analyzer.cfg.Configuration;
-import org.wltea.analyzer.dic.Dictionary;
 import org.wltea.analyzer.lucene.IKAnalyzer;
 import org.wltea.analyzer.lucene.IKTokenizer;
 
@@ -21,14 +20,14 @@ import org.wltea.analyzer.lucene.IKTokenizer;
  */
 public class IKIndicesAnalysis extends AbstractComponent {
 
-    private boolean useSmart=false;
+    private boolean useSmart = false;
 
     @Inject
     public IKIndicesAnalysis(final Settings settings,
-                                   IndicesAnalysisService indicesAnalysisService,Environment env) {
+                             IndicesAnalysisService indicesAnalysisService, Environment env) {
         super(settings);
-        final Configuration configuration=new Configuration(env,settings).setUseSmart(false);
-        final Configuration smartConfiguration=new Configuration(env,settings).setUseSmart(true);
+        final Configuration configuration = new Configuration(env, settings).setUseSmart(false);
+        final Configuration smartConfiguration = new Configuration(env, settings).setUseSmart(true);
 
         indicesAnalysisService.analyzerProviderFactories().put("ik",
                 new PreBuiltAnalyzerProviderFactory("ik", AnalyzerScope.GLOBAL,

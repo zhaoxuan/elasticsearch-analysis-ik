@@ -12,88 +12,89 @@ import org.elasticsearch.common.logging.Loggers;
 
 public class Monitor implements Runnable {
 
-	public static ESLogger logger= Loggers.getLogger("ik-analyzer");
+    public static ESLogger logger = Loggers.getLogger("ik-analyzer");
 
-	private static CloseableHttpClient httpclient = HttpClients.createDefault();
-	/*
-	 * 上次更改时间
-	 */
-	private String last_modified;
-	/*
-	 * 资源属性
-	 */
-	private String eTags;
+    private static CloseableHttpClient httpclient = HttpClients.createDefault();
+    /*
+     * 上次更改时间
+     */
+    private String last_modified;
+    /*
+     * 资源属性
+     */
+    private String eTags;
 
-	/*
-	 * 请求地址
-	 */
-	private String location;
+    /*
+     * 请求地址
+     */
+    private String location;
 
-	public Monitor(String location) {
-		this.location = location;
-		this.last_modified = null;
-		this.eTags = null;
-	}
-	/**
-	 * 监控流程：
-	 *  ①向词库服务器发送Head请求
-	 *  ②从响应中获取Last-Modify、ETags字段值，判断是否变化
-	 *  ③如果未变化，休眠1min，返回第①步
-	 * 	④如果有变化，重新加载词典
-	 *  ⑤休眠1min，返回第①步
-	 */
+    public Monitor(String location) {
+        this.location = location;
+        this.last_modified = null;
+        this.eTags = null;
+    }
 
-	public void run() {
+    /**
+     * 监控流程：
+     * ①向词库服务器发送Head请求
+     * ②从响应中获取Last-Modify、ETags字段值，判断是否变化
+     * ③如果未变化，休眠1min，返回第①步
+     * ④如果有变化，重新加载词典
+     * ⑤休眠1min，返回第①步
+     */
 
-		//超时设置
-		RequestConfig rc = RequestConfig.custom().setConnectionRequestTimeout(10*1000)
-				.setConnectTimeout(10*1000).setSocketTimeout(15*1000).build();
+    public void run() {
 
-		HttpHead head = new HttpHead(location);
-		head.setConfig(rc);
+        //超时设置
+        RequestConfig rc = RequestConfig.custom().setConnectionRequestTimeout(10 * 1000)
+                .setConnectTimeout(10 * 1000).setSocketTimeout(15 * 1000).build();
 
-		//设置请求头
-		if (last_modified != null) {
-			head.setHeader("If-Modified-Since", last_modified);
-		}
-		if (eTags != null) {
-			head.setHeader("If-None-Match", eTags);
-		}
+        HttpHead head = new HttpHead(location);
+        head.setConfig(rc);
 
-		CloseableHttpResponse response = null;
-		try {
+        //设置请求头
+        if (last_modified != null) {
+            head.setHeader("If-Modified-Since", last_modified);
+        }
+        if (eTags != null) {
+            head.setHeader("If-None-Match", eTags);
+        }
 
-			response = httpclient.execute(head);
+        CloseableHttpResponse response = null;
+        try {
 
-			//返回200 才做操作
-			if(response.getStatusLine().getStatusCode()==200){
+            response = httpclient.execute(head);
 
-				if (((response.getLastHeader("Last-Modified")!=null) && !response.getLastHeader("Last-Modified").getValue().equalsIgnoreCase(last_modified))
-						||((response.getLastHeader("ETag")!=null) && !response.getLastHeader("ETag").getValue().equalsIgnoreCase(eTags))) {
+            //返回200 才做操作
+            if (response.getStatusLine().getStatusCode() == 200) {
 
-					// 远程词库有更新,需要重新加载词典，并修改last_modified,eTags
-					Dictionary.getSingleton().reLoadMainDict();
-					last_modified = response.getLastHeader("Last-Modified")==null?null:response.getLastHeader("Last-Modified").getValue();
-					eTags = response.getLastHeader("ETag")==null?null:response.getLastHeader("ETag").getValue();
-				}
-			}else if (response.getStatusLine().getStatusCode()==304) {
-				//没有修改，不做操作
-				//noop
-			}else{
-				Dictionary.logger.info("remote_ext_dict {} return bad code {}" , location , response.getStatusLine().getStatusCode() );
-			}
+                if (((response.getLastHeader("Last-Modified") != null) && !response.getLastHeader("Last-Modified").getValue().equalsIgnoreCase(last_modified))
+                        || ((response.getLastHeader("ETag") != null) && !response.getLastHeader("ETag").getValue().equalsIgnoreCase(eTags))) {
 
-		} catch (Exception e) {
-			Dictionary.logger.error("remote_ext_dict {} error!",e , location);
-		}finally{
-			try {
-				if (response != null) {
-					response.close();
-				}
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-			}
-		}
-	}
+                    // 远程词库有更新,需要重新加载词典，并修改last_modified,eTags
+                    Dictionary.getSingleton().reLoadMainDict();
+                    last_modified = response.getLastHeader("Last-Modified") == null ? null : response.getLastHeader("Last-Modified").getValue();
+                    eTags = response.getLastHeader("ETag") == null ? null : response.getLastHeader("ETag").getValue();
+                }
+            } else if (response.getStatusLine().getStatusCode() == 304) {
+                //没有修改，不做操作
+                //noop
+            } else {
+                Dictionary.logger.info("remote_ext_dict {} return bad code {}", location, response.getStatusLine().getStatusCode());
+            }
+
+        } catch (Exception e) {
+            Dictionary.logger.error("remote_ext_dict {} error!", e, location);
+        } finally {
+            try {
+                if (response != null) {
+                    response.close();
+                }
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
 
 }

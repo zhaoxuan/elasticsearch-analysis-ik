@@ -5,13 +5,14 @@ The IK Analysis plugin integrates Lucene IK analyzer (http://code.google.com/p/i
 
 Analyzer: `ik_smart` , `ik_max_word` , Tokenizer: `ik_smart` , `ik_max_word` 
 
+最高支持到 ES 2.4 版本的一个子分支，tag:1.10.1
+
 Versions
 --------
 
 IK version | ES version
 -----------|-----------
-master | 2.4.0 -> master
-1.10.0 | 2.4.0
+1.10.1 | 2.4.1
 1.9.5 | 2.3.5
 1.9.4 | 2.3.4
 1.9.3 | 2.3.3
