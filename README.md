@@ -5,7 +5,7 @@ The IK Analysis plugin integrates Lucene IK analyzer (http://code.google.com/p/i
 
 Analyzer: `ik_smart` , `ik_max_word` , Tokenizer: `ik_smart` , `ik_max_word` 
 
-最高支持到 ES 2.4 版本的一个子分支，tag:1.10.1
+最高支持到 ES 2.4 版本的一个子分支，fork from tag:1.10.1
 
 Versions
 --------
@@ -30,9 +30,15 @@ Install
 
 1.compile
 
-`mvn package`
+`mvn package -DskipTests`
 
 copy and unzip `target/releases/elasticsearch-analysis-ik-{version}.zip` to `your-es-root/plugins/ik`
+
+2.test
+
+`mvn test`
+
+`src/test/java/` 里面加入了一个 IKTokenizer 的测试，可以不要放到 ES 就能针对分词结果做测试
 
 
 2.restart elasticsearch

@@ -14,7 +14,7 @@ import java.io.StringReader;
  */
 public class TestIKTokenizer {
     @Test
-    public void testMathPow() throws IOException {
+    public void testIKTokenizer() throws IOException {
         String text = "白富美";
 
         Configuration configuration = new Configuration();
